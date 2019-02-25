@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // La información general de un ensamblado se controla mediante el siguiente 
 // conjunto de atributos. Cambie estos valores de atributo para modificar la información
 // asociada con un ensamblado.
-[assembly: AssemblyTitle("Modulo7")]
-[assembly: AssemblyDescription("Ensamblado para solución de ejercicios de bloque 3 - modulo 7")]
+[assembly: AssemblyTitle("Modulo8")]
+[assembly: AssemblyDescription("Ensamblado para solución de ejercicios de bloque 3 - modulo 8")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Extreme Solutions")]
-[assembly: AssemblyProduct("Modulo7")]
+[assembly: AssemblyProduct("Modulo8")]
 [assembly: AssemblyCopyright("Copyright © Extreme Solutions 2019")]
 [assembly: AssemblyTrademark("Extreme Solutions Trademark")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // El siguiente GUID sirve como id. de typelib si este proyecto se expone a COM.
-[assembly: Guid("e96bb2f1-9555-42a2-8fda-2982c8b4e883")]
+[assembly: Guid("da5f66f1-e525-422a-bde4-df8ea043cf1f")]
 
 // La información de versión de un ensamblado consta de los cuatro valores siguientes:
 //
