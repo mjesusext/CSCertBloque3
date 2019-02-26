@@ -231,7 +231,7 @@ namespace Modulo8
             List<AlumnoM8> AlumnosList = new List<AlumnoM8>()
             {
                 { new AlumnoM8("Nombre A1", "Apellido A1", DateTime.Now, "Ref 1", new List<string>(){ "Mates 1" , "Algebra 1"},"Aula 1") },
-                { new AlumnoM8("Nombre A2", "Apellido A2", DateTime.Now, "Ref 2", new List<string>(){ "Algebra 1", "Electrotecnia 1"},"Aula 2") }
+                { new AlumnoM8("Nombre A2", "Apellido A2", DateTime.Now, "Ref 2", new List<string>(){ "Algebra 1" , "Electrotecnia 1"},"Aula 2") }
             };
 
             return AlumnosList;
@@ -250,21 +250,16 @@ namespace Modulo8
 
         public static void GetDataFromLINQ(List<AlumnoM8> Alumnos, List<ProfesorM8> Profesores)
         {
-            var consAlum = from alumno in Alumnos
-                           select alumno;
+            var cons1 = from alumno in Alumnos
+                        select alumno;
 
-            var consProf = from profesor in Profesores
-                           select profesor;
+            var cons2 = from alumno in Alumnos
+                        where alumno.ListaAsginaturas.Count > 3
+                        orderby alumno.Apellidos
+                        select alumno;
 
-            foreach (var alum in consAlum)
-            {
-                Console.WriteLine(alum.ToString());
-            }
-
-            foreach (var prof in consProf)
-            {
-                Console.WriteLine(prof.ToString());
-            }
+            //var cons3 = from profesor in Profesores
+            //            join alumno in Alumnos on profesor.Asignatura equals alumno.ListaAsginaturas.
         }
     }
 }
