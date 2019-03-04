@@ -12,7 +12,7 @@ namespace Modulo8
         public string Apellidos { get; set; }
         public DateTime FechaNacimiento { get; set; }
         public string Referencia { get; set; }
-        public List<string> ListaAsginaturas { get; set; }
+        public List<string> ListaAsignaturas { get; set; }
         public string Aula { get; set; }
 
         public AlumnoM8() { }
@@ -23,7 +23,7 @@ namespace Modulo8
             Apellidos = apellidos;
             FechaNacimiento = fechanacimiento;
             Referencia = referencia;
-            ListaAsginaturas = listaasignaturas;
+            ListaAsignaturas = listaasignaturas;
             Aula = aula;
         }
 
@@ -35,7 +35,7 @@ namespace Modulo8
                 "Fecha nacimiento: " + FechaNacimiento.ToString() + "\n" +
                 "Referencia: " + Referencia + "\n" +
                 "Lista asignaturas:\n" +
-                string.Join("\n", ListaAsginaturas.Select((asig) => "- " + asig)) + "\n" +
+                string.Join("\n", ListaAsignaturas.Select((asig) => "- " + asig)) + "\n" +
                 "Aula: " + Aula + "\n";
         }
     }

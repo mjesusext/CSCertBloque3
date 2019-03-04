@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace Modulo8
 {
@@ -11,7 +12,8 @@ namespace Modulo8
         static void Main(string[] args)
         {
             //GetDataFromLINQ(GetInputAlumnos1A(), GetInputProfesores1B());
-            GetDataFromLINQ(GetHardcodedAlumnos1A(), GetHardcodedProfesores1B());
+            //GetDataFromLINQ_QuerySyntax(GetHardcodedAlumnos1A(), GetHardcodedProfesores1B());
+            GetDataFromLINQ_FluentSyntax(GetHardcodedAlumnos1A(), GetHardcodedProfesores1B());
 
             Console.ReadLine();
         }
@@ -230,8 +232,10 @@ namespace Modulo8
         {
             List<AlumnoM8> AlumnosList = new List<AlumnoM8>()
             {
-                { new AlumnoM8("Nombre A1", "Apellido A1", DateTime.Now, "Ref 1", new List<string>(){ "Mates 1" , "Algebra 1"},"Aula 1") },
-                { new AlumnoM8("Nombre A2", "Apellido A2", DateTime.Now, "Ref 2", new List<string>(){ "Algebra 1" , "Electrotecnia 1"},"Aula 2") }
+                { new AlumnoM8("ANombre A1", "Apellido A1", new DateTime(1989,1,1), "Ref 1", new List<string>(){ "Mates 1" , "Algebra 1"},"Aula 1") },
+                { new AlumnoM8("Nombre A2", "Apellido A2", new DateTime(1990,1,1), "Ref 2", new List<string>(){ "Algebra 1" , "Electrotecnia 1", "Mates 1", "Fisica 1"},"Aula 2") },
+                { new AlumnoM8("Nombre A3", "Apellido A3", new DateTime(1991,1,1), "Ref 3", new List<string>(){ "Algebra 1" , "Electrotecnia 1"},"Aula 3") },
+                { new AlumnoM8("Nombre A4", "Apellido A4", new DateTime(1992,1,1), "Ref 4", new List<string>(){ "Algebra 1" , "Electrotecnia 1"},"Aula 4") }
             };
 
             return AlumnosList;
@@ -241,25 +245,237 @@ namespace Modulo8
         {
             List<ProfesorM8> ProfesoresList = new List<ProfesorM8>()
             {
-                {new ProfesorM8("Nombre P1", "Apellido P1", DateTime.Now, "Ref 1", "Mates 1")},
-                {new ProfesorM8("Nombre P2", "Apellido P2", DateTime.Now, "Ref 2", "Algebra 2")},
+                {new ProfesorM8("Nombre P1", "Apellido P1", new DateTime(1960,1,1), "Ref 1", "Mates 1")},
+                {new ProfesorM8("Nombre P2", "Apellido P2", new DateTime(1961,1,1), "Ref 2", "Algebra 1")},
+                {new ProfesorM8("Nombre P3", "Apellido P3", new DateTime(1962,1,1), "Ref 3", "Electrotecnia 1")},
+                {new ProfesorM8("Nombre P4", "Apellido P4", new DateTime(1963,1,1), "Ref 4", "Fisica 1")}
             };
 
             return ProfesoresList;
         }
 
-        public static void GetDataFromLINQ(List<AlumnoM8> Alumnos, List<ProfesorM8> Profesores)
+        public static void GetDataFromLINQ_QuerySyntax(List<AlumnoM8> Alumnos, List<ProfesorM8> Profesores)
         {
+            //Numero total de alumnos
             var cons1 = from alumno in Alumnos
                         select alumno;
-
+            Console.WriteLine("----- EJ1: total alumnos -----");
+            Console.WriteLine("Total alumnos: {0}", cons1.Count());
+            
+            //Alumnos que tienen mas de 3 asignaturas, ordenado por apellidos
             var cons2 = from alumno in Alumnos
-                        where alumno.ListaAsginaturas.Count > 3
+                        where alumno.ListaAsignaturas.Count > 3
                         orderby alumno.Apellidos
                         select alumno;
 
-            //var cons3 = from profesor in Profesores
-            //            join alumno in Alumnos on profesor.Asignatura equals alumno.ListaAsginaturas.
+            Console.WriteLine("----- EJ2: Alumnos que tienen mas de 3 asignaturas, ordenado por apellidos -----");
+            foreach (var item in cons2)
+            {
+                Console.WriteLine("- {0} {1}", item.Nombre, item.Apellidos);
+            }
+
+            //Profesores y alumnos adscritos a sus clases
+            var cons3 = from profesor in Profesores
+                        from alumno in Alumnos
+                        where alumno.ListaAsignaturas.Contains(profesor.Asignatura)
+                        group alumno by profesor;
+
+            Console.WriteLine("----- EJ3: Profesores y alumnos adscritos a sus clases -----");
+            foreach (var profs in cons3)
+            {
+                Console.WriteLine("Alumnos pertenecientes al profesor: {0} {1}", profs.Key.Nombre, profs.Key.Apellidos);
+
+                foreach (var alu in profs)
+                {
+                    Console.WriteLine("- " + alu.Nombre + " " + alu.Apellidos);
+                }
+            }
+
+            //Media edad, edad maxima y minima de alumnos y profesores juntos
+            var cons4 = from alumno in Alumnos
+                        select new
+                        {
+                            Nombre = alumno.Nombre,
+                            Apellidos = alumno.Apellidos,
+                            Edad = DateTime.Now.Subtract(alumno.FechaNacimiento).TotalDays / 365.25
+                        };
+
+            var cons4B = cons4.Union(
+                            from profesor in Profesores
+                            select new
+                            {
+                                Nombre = profesor.Nombre,
+                                Apellidos = profesor.Apellidos,
+                                Edad = DateTime.Now.Subtract(profesor.FechaNacimiento).TotalDays / 365.25 }
+                            );
+
+            Console.WriteLine("----- EJ4: Edad maxima, minima y media entre profesores y alumnos -----");
+
+            Console.WriteLine("Edad media: {0}\nEdad máxima: {1}\nEdad mínima: {2}", cons4B.Average((x) => x.Edad), cons4B.Max((x) => x.Edad), cons4B.Min((x) => x.Edad));
+
+            //Lista completa de personas ordenada por fecha de nacimiento
+            //Usar resultado de cons4 -> cons4B
+            var cons5 = from persona in cons4B
+                        orderby persona.Edad
+                        select persona;
+
+            Console.WriteLine("----- EJ5: lista de alumnos y profesores ordenada por edad -----");
+
+            foreach (var item in cons5)
+            {
+                Console.WriteLine("- {0} {1}", item.Nombre, item.Apellidos);
+            }
+
+            //Lista asignaturas que tienen alumnos indicando alumnos totales por asignatura
+            //Versionamos la consulta 3
+            var cons6 = from profesor in Profesores
+                        from alumno in Alumnos
+                        where alumno.ListaAsignaturas.Contains(profesor.Asignatura)
+                        group alumno by profesor.Asignatura;
+
+            Console.WriteLine("----- EJ6: Asignaturas y cantidad de matriculados por cada una -----");
+            foreach (var item in cons6)
+            {
+                Console.WriteLine("Asignatura {0} --> {1}", item.Key, item.Count());
+            }
+
+            //Mostrar alumnos cuyo nombre empiece por vocal
+
+            Console.WriteLine("----- EJ7: Alumnos con nombre que empiece en vocal -----");
+            var cons7 = from alumno in Alumnos
+                        where Regex.IsMatch(alumno.Nombre, @"^[aeiouAEIOU][\w]*")
+                        select alumno;
+
+            foreach (var item in cons7)
+            {
+                Console.WriteLine("- {0} {1}", item.Nombre, item.Apellidos);
+            }
+
+            //Mostrar los nombres diferentes que hay entre alumnos y profesores
+            Console.WriteLine("----- EJ7: Nombres de pila distintos entre profesores y alumnos -----");
+            var cons8 = (from alumno in Alumnos
+                         select alumno.Nombre)
+                        .Union
+                        (from profesor in Profesores
+                         select profesor.Nombre)
+                         .Distinct();
+
+            foreach (var item in cons8)
+            {
+                Console.WriteLine("- {0}", item);
+            }
+        }
+
+        public static void GetDataFromLINQ_FluentSyntax(List<AlumnoM8> Alumnos, List<ProfesorM8> Profesores)
+        {
+            //Numero total de alumnos
+            var cons1 = Alumnos.Count();
+            Console.WriteLine("----- EJ1: total alumnos -----");
+            Console.WriteLine("Total alumnos: {0}", cons1);
+
+            //Alumnos que tienen mas de 3 asignaturas, ordenado por apellidos
+            var cons2 = Alumnos
+                        .Where((x) => x.ListaAsignaturas.Count > 3)
+                        .OrderBy((x) => x.Apellidos);
+
+            Console.WriteLine("----- EJ2: Alumnos que tienen mas de 3 asignaturas, ordenado por apellidos -----");
+            foreach (var item in cons2)
+            {
+                Console.WriteLine("- {0} {1}", item.Nombre, item.Apellidos);
+            }
+
+            //Profesores y alumnos adscritos a sus clases
+            var cons3 = Profesores.Join(Alumnos,null, null, null)
+                        .Where()
+                        .GroupBy()
+
+            var cons3 = from profesor in Profesores
+                        from alumno in Alumnos
+                        where alumno.ListaAsignaturas.Contains(profesor.Asignatura)
+                        group alumno by profesor;
+
+            Console.WriteLine("----- EJ3: Profesores y alumnos adscritos a sus clases -----");
+            foreach (var profs in cons3)
+            {
+                Console.WriteLine("Alumnos pertenecientes al profesor: {0} {1}", profs.Key.Nombre, profs.Key.Apellidos);
+
+                foreach (var alu in profs)
+                {
+                    Console.WriteLine("- " + alu.Nombre + " " + alu.Apellidos);
+                }
+            }
+
+            //Media edad, edad maxima y minima de alumnos y profesores juntos
+            var cons4B = Alumnos.Select(
+                        (x) => new
+                        {
+                            Nombre = x.Nombre,
+                            Apellidos = x.Apellidos,
+                            Edad = DateTime.Now.Subtract(x.FechaNacimiento).TotalDays / 365.25
+                        }
+                        )
+                        .Union(Profesores.Select
+                            (
+                                (x) => new
+                                {
+                                    Nombre = x.Nombre,
+                                    Apellidos = x.Apellidos,
+                                    Edad = DateTime.Now.Subtract(x.FechaNacimiento).TotalDays / 365.25
+                                }
+                            )
+                        );
+
+            Console.WriteLine("----- EJ4: Edad maxima, minima y media entre profesores y alumnos -----");
+
+            Console.WriteLine("Edad media: {0}\nEdad máxima: {1}\nEdad mínima: {2}", cons4B.Average((x) => x.Edad), cons4B.Max((x) => x.Edad), cons4B.Min((x) => x.Edad));
+
+            //Lista completa de personas ordenada por fecha de nacimiento
+            //Usar resultado de cons4 -> cons4B
+            var cons5 = cons4B.OrderBy((x) => x.Edad);
+                        
+            Console.WriteLine("----- EJ5: lista de alumnos y profesores ordenada por edad -----");
+
+            foreach (var item in cons5)
+            {
+                Console.WriteLine("- {0} {1}", item.Nombre, item.Apellidos);
+            }
+
+            //Lista asignaturas que tienen alumnos indicando alumnos totales por asignatura
+            //Versionamos la consulta 3
+
+            var cons6 
+            var cons6 = from profesor in Profesores
+                        from alumno in Alumnos
+                        where alumno.ListaAsignaturas.Contains(profesor.Asignatura)
+                        group alumno by profesor.Asignatura;
+
+            Console.WriteLine("----- EJ6: Asignaturas y cantidad de matriculados por cada una -----");
+            foreach (var item in cons6)
+            {
+                Console.WriteLine("Asignatura {0} --> {1}", item.Key, item.Count());
+            }
+
+            //Mostrar alumnos cuyo nombre empiece por vocal
+
+            Console.WriteLine("----- EJ7: Alumnos con nombre que empiece en vocal -----");
+            var cons7 = Alumnos.Where((x) => Regex.IsMatch(x.Nombre, @"^[aeiouAEIOU][\w]*"));
+
+            foreach (var item in cons7)
+            {
+                Console.WriteLine("- {0} {1}", item.Nombre, item.Apellidos);
+            }
+
+            //Mostrar los nombres diferentes que hay entre alumnos y profesores
+            Console.WriteLine("----- EJ7: Nombres de pila distintos entre profesores y alumnos -----");
+            var cons8 = Alumnos.Select((x) => x.Nombre)
+                        .Union
+                        (Profesores.Select((x) => x.Nombre))
+                         .Distinct();
+
+            foreach (var item in cons8)
+            {
+                Console.WriteLine("- {0}", item);
+            }
         }
     }
 }
