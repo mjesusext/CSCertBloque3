@@ -375,8 +375,8 @@ namespace Modulo8
 
             //Alumnos que tienen mas de 3 asignaturas, ordenado por apellidos
             var cons2 = Alumnos
-                        .Where((x) => x.ListaAsignaturas.Count > 3)
-                        .OrderBy((x) => x.Apellidos);
+                        .Where(x => x.ListaAsignaturas.Count > 3)
+                        .OrderBy(x => x.Apellidos);
 
             Console.WriteLine("----- EJ2: Alumnos que tienen mas de 3 asignaturas, ordenado por apellidos -----");
             foreach (var item in cons2)
@@ -385,14 +385,9 @@ namespace Modulo8
             }
 
             //Profesores y alumnos adscritos a sus clases
-            var cons3 = Profesores.Join(Alumnos,null, null, null)
-                        .Where()
-                        .GroupBy()
-
-            var cons3 = from profesor in Profesores
-                        from alumno in Alumnos
-                        where alumno.ListaAsignaturas.Contains(profesor.Asignatura)
-                        group alumno by profesor;
+            var cons3 = Profesores.SelectMany(prof => Alumnos, (prof, alu) => new { prof, alu })
+                        .Where(x => x.alu.ListaAsignaturas.Contains(x.prof.Asignatura))
+                        .GroupBy(x => x.prof, x => x.alu);
 
             Console.WriteLine("----- EJ3: Profesores y alumnos adscritos a sus clases -----");
             foreach (var profs in cons3)
@@ -407,7 +402,7 @@ namespace Modulo8
 
             //Media edad, edad maxima y minima de alumnos y profesores juntos
             var cons4B = Alumnos.Select(
-                        (x) => new
+                        x => new
                         {
                             Nombre = x.Nombre,
                             Apellidos = x.Apellidos,
@@ -416,7 +411,7 @@ namespace Modulo8
                         )
                         .Union(Profesores.Select
                             (
-                                (x) => new
+                                x => new
                                 {
                                     Nombre = x.Nombre,
                                     Apellidos = x.Apellidos,
@@ -443,11 +438,9 @@ namespace Modulo8
             //Lista asignaturas que tienen alumnos indicando alumnos totales por asignatura
             //Versionamos la consulta 3
 
-            var cons6 
-            var cons6 = from profesor in Profesores
-                        from alumno in Alumnos
-                        where alumno.ListaAsignaturas.Contains(profesor.Asignatura)
-                        group alumno by profesor.Asignatura;
+            var cons6 = Profesores.SelectMany(prof => Alumnos, (prof, alu) => new { prof, alu })
+                        .Where(x => x.alu.ListaAsignaturas.Contains(x.prof.Asignatura))
+                        .GroupBy(x => x.prof.Asignatura, x => x.alu);
 
             Console.WriteLine("----- EJ6: Asignaturas y cantidad de matriculados por cada una -----");
             foreach (var item in cons6)
@@ -458,7 +451,7 @@ namespace Modulo8
             //Mostrar alumnos cuyo nombre empiece por vocal
 
             Console.WriteLine("----- EJ7: Alumnos con nombre que empiece en vocal -----");
-            var cons7 = Alumnos.Where((x) => Regex.IsMatch(x.Nombre, @"^[aeiouAEIOU][\w]*"));
+            var cons7 = Alumnos.Where(x => Regex.IsMatch(x.Nombre, @"^[aeiouAEIOU][\w]*"));
 
             foreach (var item in cons7)
             {
@@ -467,9 +460,9 @@ namespace Modulo8
 
             //Mostrar los nombres diferentes que hay entre alumnos y profesores
             Console.WriteLine("----- EJ7: Nombres de pila distintos entre profesores y alumnos -----");
-            var cons8 = Alumnos.Select((x) => x.Nombre)
+            var cons8 = Alumnos.Select(x => x.Nombre)
                         .Union
-                        (Profesores.Select((x) => x.Nombre))
+                        (Profesores.Select(x => x.Nombre))
                          .Distinct();
 
             foreach (var item in cons8)
